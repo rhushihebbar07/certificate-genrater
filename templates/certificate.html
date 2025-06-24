@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Certificate of Completion</title>
+  <style>
+    @page {
+      size: A4 landscape;
+      margin: 0;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Georgia', serif;
+      background-color: #fff;
+    }
+
+    .container {
+      border: 20px solid #1e3a8a;
+      width: 297mm;
+      height: 210mm;
+      box-sizing: border-box;
+      padding: 25mm;
+      position: relative;
+      background: url('{{ url_for("static", filename="certificate_bg.png") }}') no-repeat center center;
+      background-size: cover;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 40px;
+      margin: 0;
+      color: #1e3a8a;
+    }
+
+    h2 {
+      text-align: center;
+      font-size: 22px;
+      color: #444;
+      margin: 10px 0 30px;
+    }
+
+    .name {
+      text-align: center;
+      font-size: 30px;
+      font-weight: bold;
+      margin: 25px 0;
+      color: #222;
+    }
+
+    .details {
+      text-align: center;
+      font-size: 18px;
+      margin: 15px 50px;
+      line-height: 1.6;
+      color: #333;
+    }
+
+    .signatures {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      position: absolute;
+      bottom: 35mm;
+      left: 25mm;
+      right: 25mm;
+    }
+
+    .signatures div {
+      text-align: center;
+      width: 40%;
+    }
+
+    .signatures img {
+      max-height: 50px;
+      margin-bottom: 6px;
+    }
+
+    .signatures p {
+      margin: 0;
+      font-size: 14px;
+      font-weight: bold;
+      color: #222;
+    }
+
+    .date {
+      position: absolute;
+      bottom: 20mm;
+      right: 25mm;
+      font-size: 15px;
+      color: #222;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Certificate of Completion</h1>
+    <h2>SAINT MARY'S SYRIAN COLLEGE<br>Department of Computer Applications</h2>
+
+    <div class="details">
+      This is to certify that<br>
+      <div class="name">{{ name }}</div>
+      has successfully completed the hands‑on project entitled<br>
+      "<strong>{{ repo_title }}</strong>"<br>
+      hosted at: <em>{{ github_url }}</em>
+    </div>
+
+    <div class="signatures">
+      <div>
+        <img src="{{ url_for('static', filename='hod_signature.png') }}" alt="HOD Signature">
+        <p>Head of Department</p>
+      </div>
+      <div>
+        <img src="{{ url_for('static', filename='principal_signature.png') }}" alt="Principal Signature">
+        <p>Principal</p>
+      </div>
+    </div>
+
+    <div class="date">Issued on: {{ date }}</div>
+  </div>
+</body>
+</html>

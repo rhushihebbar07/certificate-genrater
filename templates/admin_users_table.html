@@ -1,0 +1,47 @@
+<div class="row">
+  <div class="col-12">
+    <h4>👥 Registered Users</h4>
+    <div class="table-responsive">
+      <table class="table table-striped table-hover align-middle" id="usersTable">
+        <thead class="text-center">
+          <tr>
+            <th>ID</th>
+            <th>Profile</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Admin?</th>
+            <th>Phone</th>
+            <th>Batch</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in users %}
+          <tr>
+            <td class="text-center">{{ user.id }}</td>
+            <td class="text-center">
+              <img src="{{ url_for('static', filename='profile_pics/' + (user.profile_pic or 'default.png')) }}" width="40" height="40" />
+            </td>
+            <td>{{ user.first_name }} {{ user.last_name }}</td>
+            <td>{{ user.email }}</td>
+            <td class="text-center">{{ 'Yes' if user.is_admin else 'No' }}</td>
+            <td>{{ user.phone }}</td>
+            <td>{{ user.class_batch }}</td>
+            <td>
+              <div class="btn-group">
+                <a href="/admin/user/{{ user.id }}" class="btn btn-sm btn-primary">Edit</a>
+                {% if user.is_admin %}
+                  <a href="/admin/revoke-admin/{{ user.id }}" class="btn btn-sm btn-warning">Demote</a>
+                {% else %}
+                  <a href="/admin/make-admin/{{ user.id }}" class="btn btn-sm btn-success">Promote</a>
+                {% endif %}
+                <button class="btn btn-sm btn-danger delete-user-btn" data-user-id="{{ user.id }}">Delete</button>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

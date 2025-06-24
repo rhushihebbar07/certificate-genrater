@@ -1,0 +1,16 @@
+# Ignore DB and sensitive data
+*.db
+instance/
+.env
+__pycache__/
+*.pyc
+
+# User uploaded images
+static/profile_pics/*
+certificates/
+
+# Ignore all uploaded profile pictures
+static/profile_pics/
+
+users.db
+static/profile_pics/

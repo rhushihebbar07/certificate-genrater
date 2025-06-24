@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Login Logs - Admin{% endblock %}
+
+{% block content %}
+<link href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4 text-primary fw-bold">📜 Login Activity Logs</h2>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle" id="loginLogsTable">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>📧 Email</th>
+                    <th>🌐 IP Address</th>
+                    <th>🧭 User Agent</th>
+                    <th>📍 Location</th>
+                    <th>⏰ Login Time</th>
+                    <th>🚪 Logout Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ log['email'] }}</td>
+                    <td>{{ log['ip'] }}</td>
+                    <td style="max-width: 300px; word-break: break-word;">{{ log['user_agent'] }}</td>
+                    <td>{{ log['location'] or 'Unknown' }}</td>
+                    <td>{{ log['login_time'] or '—' }}</td>
+                    <td class="text-danger">{{ log['logout_time'] or '—' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#loginLogsTable').DataTable({
+            responsive: true,
+            order: [[5, 'desc']],
+            language: {
+                search: "🔍 Search:",
+                lengthMenu: "Show _MENU_ entries",
+                info: "Showing _START_ to _END_ of _TOTAL_ logs",
+            }
+        });
+    });
+</script>
+{% endblock %}

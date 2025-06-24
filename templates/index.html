@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Submit Your Project{% endblock %}
+
+{% block content %}
+<div class="form-card" style="
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 30px 40px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  font-family: 'Roboto', sans-serif;
+">
+  <h2 style="font-family: 'Montserrat', sans-serif; color: #2563eb; margin-bottom: 25px; text-align: center;">
+    Submit Your GitHub Project
+  </h2>
+
+  <div style="background-color: #eff6ff; border-left: 4px solid #2563eb; padding: 15px 20px; border-radius: 8px; margin-bottom: 25px;">
+    <h5 style="margin-bottom: 10px; color: #1e3a8a; font-weight: 600;">📌 Rules for Upload:</h5>
+    <ul style="padding-left: 20px; color: #1e293b;">
+      <li>✅ After hosting your GitHub project, paste the link here.</li>
+      <li>✅ A team of 3 members must enter the same <strong>Project Title</strong>.</li>
+      <li>✅ After upload, a certificate will be sent <strong>after approval</strong>.</li>
+    </ul>
+  </div>
+
+  {% if not existing_project %}
+    <form method="POST" style="display: flex; flex-direction: column; gap: 18px;">
+      <label for="name" style="font-weight: 600; color: #1e293b;">Name:</label>
+      <input type="text" id="name" name="name" required value="{{ session.get('username', '') }}"
+        style="padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 1rem; transition: border-color 0.3s ease;"
+        onfocus="this.style.borderColor='#2563eb';" onblur="this.style.borderColor='#cbd5e1';" />
+
+      <label for="email" style="font-weight: 600; color: #1e293b;">Email:</label>
+      <input type="email" id="email" name="email" required value="{{ session.get('email', '') }}"
+        style="padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 1rem; transition: border-color 0.3s ease;"
+        onfocus="this.style.borderColor='#2563eb';" onblur="this.style.borderColor='#cbd5e1';" />
+
+      <label for="project_title" style="font-weight: 600; color: #1e293b;">Project Title:</label>
+      <input type="text" id="project_title" name="project_title" required
+        style="padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 1rem; transition: border-color 0.3s ease;"
+        onfocus="this.style.borderColor='#2563eb';" onblur="this.style.borderColor='#cbd5e1';" />
+
+      <label for="github_url" style="font-weight: 600; color: #1e293b;">GitHub Link:</label>
+      <input type="url" id="github_url" name="github_url" required
+        style="padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 1rem; transition: border-color 0.3s ease;"
+        onfocus="this.style.borderColor='#2563eb';" onblur="this.style.borderColor='#cbd5e1';" />
+
+      <button type="submit"
+        style="background-color: #2563eb; color: white; padding: 12px 0; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: background-color 0.3s ease;"
+        onmouseover="this.style.backgroundColor='#1e40af';" onmouseout="this.style.backgroundColor='#2563eb';">
+        Generate Certificate
+      </button>
+    </form>
+  {% else %}
+    <div style="text-align: center; margin-top: 25px; font-size: 1.1rem; color: #475569;">
+      <p><strong>You have already submitted a project.</strong></p>
+
+      {% if session.get('is_admin') %}
+        <form method="POST" action="{{ url_for('reset_project') }}"
+          style="margin-top: 20px; max-width: 320px; margin-left: auto; margin-right: auto;">
+          <label for="admin_password" style="font-weight: 600; display: block; margin-bottom: 6px; color: #1e293b;">
+            Enter Admin Password to Reset:
+          </label>
+          <input type="password" id="admin_password" name="admin_password" required
+            style="width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 1rem; margin-bottom: 15px; transition: border-color 0.3s ease;"
+            onfocus="this.style.borderColor='#2563eb';" onblur="this.style.borderColor='#cbd5e1';" />
+          <button type="submit"
+            style="width: 100%; background-color: #dc2626; color: white; padding: 12px 0; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: background-color 0.3s ease;"
+            onmouseover="this.style.backgroundColor='#991b1b';" onmouseout="this.style.backgroundColor='#dc2626';">
+            Reset Submission
+          </button>
+        </form>
+      {% else %}
+        <p><strong>After approval, a certificate will be sent to your email ID.</strong></p>
+      {% endif %}
+    </div>
+  {% endif %}
+</div>
+
+<footer style="text-align:center; margin-top: 60px; color: #64748b; font-size: 0.9rem; font-weight: 500;">
+  &copy; 2025 Department of Computer Applications | Mangalore University Affiliation
+</footer>
+{% endblock %}
+
+{% if show_cert_popup %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  Swal.fire({
+    title: '🎉 Certificate Ready!',
+    text: 'Your project is approved. Click below to view your certificate.',
+    icon: 'success',
+    confirmButtonText: 'View Certificate',
+    confirmButtonColor: '#2563eb'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      window.location.href = "/view-certificate?com={{ cert_file }}";
+    }
+  });
+</script>
+{% endif %}
+

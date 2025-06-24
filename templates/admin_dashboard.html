@@ -1,0 +1,301 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - SMS College{% endblock %}
+
+{% block content %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+
+<style>
+  body {
+    background-color: #0d1117;
+    font-family: 'Segoe UI', sans-serif;
+    color: #e6edf3;
+  }
+  .navbar {
+    background-color: #161b22;
+    border-bottom: 1px solid #30363d;
+  }
+  .navbar-brand, .nav-link, .navbar-text {
+    color: #e6edf3 !important;
+  }
+  .dashboard-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 30px 0 20px;
+    text-align: center;
+    color: #58a6ff;
+  }
+  h4, h5 {
+    margin-top: 30px;
+    margin-bottom: 20px;
+    font-weight: 600;
+    color: #e6edf3;
+  }
+  canvas {
+    background: #161b22;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    padding: 10px;
+  }
+  .card, .table, .form-control {
+    background-color: #161b22;
+    border: 1px solid #30363d;
+    color: #e6edf3;
+  }
+  .table th, .table td {
+    vertical-align: middle;
+    color: #e6edf3 !important;
+    background-color: #161b22 !important;
+  }
+  .table thead {
+    background-color: #21262d !important;
+    color: #e6edf3 !important;
+  }
+  .table img {
+    object-fit: cover;
+    border-radius: 50%;
+    box-shadow: 0 2px 6px rgba(255,255,255,0.05);
+  }
+  .btn-outline-light, .btn-primary, .btn-success, .btn-warning, .btn-danger {
+    border-radius: 8px;
+  }
+  .badge {
+    font-size: 0.9rem;
+    padding: 0.5em 0.75em;
+  }
+  footer {
+    border-top: 1px solid #30363d;
+    padding-top: 10px;
+    margin-top: 40px;
+    color: #8b949e;
+  }
+  .side-panel {
+    background-color: #161b22;
+    border-left: 1px solid #30363d;
+    padding: 15px;
+    height: 100vh;
+    overflow-y: auto;
+    position: fixed;
+    top: 0;
+    right: -300px;
+    width: 300px;
+    color: #e6edf3;
+    z-index: 1030;
+    transition: right 0.3s ease;
+  }
+  .side-panel.visible {
+    right: 0;
+  }
+  .side-panel h6 {
+    margin-top: 20px;
+    font-weight: 600;
+  }
+  .side-panel ul {
+    list-style: none;
+    padding-left: 0;
+  }
+  .side-panel ul li {
+    padding: 5px 0;
+    border-bottom: 1px solid #30363d;
+  }
+  .toggle-panel-btn {
+    position: fixed;
+    top: 100px;
+    right: 10px;
+    z-index: 1040;
+  }
+</style>
+
+
+<nav class="navbar navbar-expand-lg navbar-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand fw-bold" href="#">🎓 Admin Panel</a>
+    <div class="d-flex ms-auto">
+      <a class="btn btn-outline-light me-2" href="/toggle-role-view">Switch View</a>
+      <a class="btn btn-outline-light" href="/logout">Logout</a>
+    </div>
+  </div>
+</nav>
+
+<button class="btn btn-outline-light toggle-panel-btn" id="toggleSidePanel">
+  <i class="bi bi-list"></i>
+</button>
+
+<div class="container-fluid px-4">
+  <h2 class="dashboard-title">Saint Mary's Syrian College Admin Dashboard</h2>
+
+  <div class="row g-4 mb-4">
+    <div class="col-md-6">
+      <h5 class="text-center">📈 User Traffic Overview</h5>
+      <canvas id="trafficChart"></canvas>
+    </div>
+    <div class="col-md-6">
+      <h5 class="text-center">📊 Certificate Distribution</h5>
+      <canvas id="certChart"></canvas>
+    </div>
+  </div>
+
+  <div class="row my-4">
+    <div class="col-md-12 d-flex justify-content-center flex-wrap gap-2">
+      <a href="/admin/export-users" class="btn btn-outline-primary">📥 Download Users Excel</a>
+      <a href="/admin/export-projects" class="btn btn-outline-success">📥 Download Projects Excel</a>
+      <a href="/admin/login-logs" class="btn btn-outline-warning">📜 View Login Logs</a>
+      <a href="/admin/export-login-logs" class="btn btn-outline-info">📤 Export Login Logs</a>
+    </div>
+  </div>
+<div class="row mt-3">
+  <div class="col-md-6">
+    <h4>🧹 Delete All Non-Admin Users</h4>
+    <form method="POST" action="/admin/delete-all-non-admins" onsubmit="return confirm('Are you sure you want to delete all users except admins?');">
+      <button class="btn btn-danger" type="submit">Delete All Non-Admin Users</button>
+    </form>
+  </div>
+</div>
+
+  {% include 'admin_users_table.html' %}
+  {% include 'admin_projects_table.html' %}
+
+  <div class="row mt-5">
+    <div class="col-md-6">
+      <h4>⚠️ Reset All Project Submissions</h4>
+      <form id="bulkResetForm" method="POST" action="/admin/reset-all-projects" class="d-flex flex-wrap align-items-center gap-2">
+        <input type="password" name="admin_password_all" class="form-control w-auto" placeholder="Admin password" required />
+        <button type="submit" class="btn btn-danger">Reset All</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="side-panel" id="sidePanel">
+  <h5>👥 Currently Online Users</h5>
+  <ul id="online-users"></ul>
+
+  <script>
+    function fetchOnlineUsers() {
+      fetch('/admin/online-users')
+        .then(res => res.json())
+        .then(users => {
+          const list = document.getElementById("online-users");
+          list.innerHTML = users.length === 0 ? "<li>No users online</li>" : "";
+          users.forEach(u => {
+            const li = document.createElement("li");
+            li.innerHTML = `
+              <span style="color:limegreen;">●</span> ${u.name} (${u.email})<br>
+              <small>Last seen: ${u.last_seen || 'just now'}</small>
+            `;
+            list.appendChild(li);
+          });
+        });
+    }
+    fetchOnlineUsers();
+    setInterval(fetchOnlineUsers, 10000);
+  </script>
+
+  <h6>📋 All Registered Users</h6>
+  <ul>
+    {% for user in all_users %}
+      <li>
+        <span style="color: {% if user.is_online %}limegreen{% else %}red{% endif %}; font-weight:bold;">●</span>
+        {{ user.first_name }} {{ user.last_name }}
+        <br><small>Last seen: {{ user.last_seen if user.last_seen else "never" }}</small>
+      </li>
+    {% endfor %}
+  </ul>
+</div>
+
+<script>
+  $(document).ready(function() {
+    $('#usersTable').DataTable();
+    $('#projectsTable').DataTable();
+
+    $('#toggleSidePanel').click(function () {
+      $('#sidePanel').toggleClass('visible');
+    });
+
+    const trafficCtx = document.getElementById('trafficChart').getContext('2d');
+    new Chart(trafficCtx, {
+      type: 'line',
+      data: {
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        datasets: [{
+          label: 'Visitors',
+          data: [12, 19, 3, 5, 2, 3, 7],
+          fill: true,
+          borderColor: '#58a6ff',
+          backgroundColor: 'rgba(88,166,255,0.1)',
+          tension: 0.4,
+          pointRadius: 4,
+          pointHoverRadius: 6
+        }]
+      },
+      options: {
+        plugins: {
+          legend: { labels: { color: '#e6edf3' } }
+        },
+        scales: {
+          x: { ticks: { color: '#e6edf3' } },
+          y: { ticks: { color: '#e6edf3' } }
+        }
+      }
+    });
+
+    const certCtx = document.getElementById('certChart').getContext('2d');
+    new Chart(certCtx, {
+      type: 'pie',
+      data: {
+        labels: ['Approved', 'Pending'],
+        datasets: [{
+          data: [{{ approved_count }}, {{ pending_count }}],
+          backgroundColor: ['#238636', '#e3b341']
+        }]
+      },
+      options: {
+        plugins: {
+          legend: { labels: { color: '#e6edf3' } }
+        }
+      }
+    });
+  });
+</script>
+
+<footer class="text-center mt-5">
+  &copy; 2025 Department of Computer Applications | Mangalore University Affiliation
+</footer>
+{% endblock %}
+
+<audio id="notificationSound" src="{{ url_for('static', filename='sounds/notify.mp3') }}" preload="auto"></audio>
+
+<script>
+function playNotificationSound() {
+  const audio = document.getElementById("notificationSound");
+  audio.play();
+}
+</script>
+
+<script>
+  {% if session.get("just_logged_in") %}
+    playNotificationSound();
+    {% set _ = session.pop("just_logged_in") %}
+  {% endif %}
+</script>
+
+<script>
+  {% if session.get("uploaded_project") %}
+    playNotificationSound();
+    {% set _ = session.pop("uploaded_project") %}
+  {% endif %}
+</script>
+
+<script>
+  {% if session.get("just_logged_out") %}
+    playNotificationSound();
+    {% set _ = session.pop("just_logged_out") %}
+  {% endif %}
+</script>

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Project Completion Certificate</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Font Awesome for social icons -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background: #f1f5f9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    nav {
+      width: 100%;
+      background-color: #1e3a8a;
+      padding: 15px 30px;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    nav .logo {
+      font-weight: bold;
+      font-size: 20px;
+      user-select: none;
+    }
+
+    nav .nav-links a {
+      color: white;
+      text-decoration: none;
+      margin-left: 20px;
+      font-weight: 600;
+      transition: color 0.3s ease;
+    }
+
+    nav .nav-links a:hover {
+      color: #93c5fd;
+      text-decoration: underline;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 960px;
+      background: #fff;
+      padding: 25px 30px;
+      margin-top: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    }
+
+    .message {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .message h2 {
+      font-size: 26px;
+      color: #1e3a8a;
+    }
+
+    .message p {
+      font-size: 16px;
+      color: #444;
+    }
+
+    .share-icons {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+
+    .share-icons a {
+      width: 42px;
+      height: 42px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      color: white;
+      text-decoration: none;
+      font-size: 18px;
+      transition: transform 0.2s;
+    }
+
+    .share-icons a:hover {
+      transform: scale(1.1);
+    }
+
+    .linkedin {
+      background-color: #0077b5;
+    }
+    .whatsapp {
+      background-color: #25d366;
+    }
+    .twitter {
+      background-color: #1da1f2;
+    }
+    .facebook {
+      background-color: #4267b2;
+    }
+    .telegram {
+      background-color: #0088cc;
+    }
+
+    iframe,
+    img {
+      width: 100%;
+      height: auto;
+      border: none;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+
+    .download-btn {
+      margin-top: 25px;
+      text-align: center;
+    }
+
+    .download-btn a {
+      padding: 10px 20px;
+      background: #1e3a8a;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      font-size: 15px;
+      display: inline-block;
+    }
+
+    .linkedin-msg {
+      margin-top: 30px;
+      text-align: center;
+    }
+
+    .linkedin-msg textarea {
+      width: 100%;
+      max-width: 720px;
+      height: 120px;
+      padding: 12px;
+      font-size: 14px;
+      resize: none;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background: #f9fafb;
+      color: #333;
+    }
+
+    .linkedin-msg p a {
+      color: #0077b5;
+      text-decoration: underline;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px 0;
+      margin-top: 30px;
+      width: 100%;
+      color: #666;
+      font-size: 14px;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 20px;
+        margin: 20px;
+      }
+      .linkedin-msg textarea {
+        font-size: 13px;
+      }
+      nav {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 15px;
+      }
+      nav .nav-links {
+        width: 100%;
+        justify-content: center;
+        margin-top: 10px;
+      }
+      nav .nav-links a {
+        margin: 0 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="logo">SAINT MARY'S SYRIAN COLLEGE</div>
+    <div class="nav-links">
+      <a href="{{ url_for('dashboard') }}">Dashboard</a>
+      {% if session.get('is_admin') %}
+        <a href="{{ url_for('admin_dashboard') }}">Admin Panel</a>
+      {% endif %}
+      <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="message">
+      <h2>🎓 Certificate of Project Completion</h2>
+      <p>
+        The student has successfully completed a hands‑on project as part of the Department of Computer Applications.
+      </p>
+    </div>
+
+    <!-- Social Share Buttons -->
+    <div class="share-icons">
+      <a class="linkedin" target="_blank" id="linkedin-share"><i class="fab fa-linkedin-in"></i></a>
+      <a class="whatsapp" target="_blank" id="whatsapp-share"><i class="fab fa-whatsapp"></i></a>
+      <a class="twitter" target="_blank" id="twitter-share"><i class="fab fa-twitter"></i></a>
+      <a class="facebook" target="_blank" id="facebook-share"><i class="fab fa-facebook-f"></i></a>
+      <a class="telegram" target="_blank" id="telegram-share"><i class="fab fa-telegram-plane"></i></a>
+    </div>
+
+    <!-- Certificate Embed -->
+    {% if cert_file.endswith('.png') %}
+      <img src="{{ url_for('serve_certificate', filename=cert_file) }}" alt="Certificate" />
+    {% else %}
+      <iframe src="{{ url_for('serve_certificate', filename=cert_file) }}" height="600" title="Certificate PDF"></iframe>
+    {% endif %}
+
+    <!-- Download Button -->
+    <div class="download-btn">
+      <a href="{{ url_for('serve_certificate', filename=cert_file) }}" download>⬇ Download Certificate</a>
+    </div>
+
+    <!-- Suggested LinkedIn Message -->
+    <div class="linkedin-msg">
+      <p><strong>Suggested LinkedIn Post:</strong></p>
+      <textarea readonly>
+I'm proud to have completed my hands-on project titled "{{ cert_file.split('.')[0] }}" as part of the Department of Computer Applications at Saint Mary's Syrian College. 💻🎓
+
+Check out my certificate here 👉 {{ request.url }}
+#ProjectCompletion #SMCollege #GitHub #Python #StudentAchievement
+      </textarea>
+      <p style="margin-top: 10px;">
+        <a href="https://www.linkedin.com/feed/" target="_blank">Post on LinkedIn</a>
+      </p>
+    </div>
+  </div>
+
+  <footer>
+    &copy; 2025 Saint Mary's Syrian College · Department of Computer Applications · All Rights Reserved
+  </footer>
+
+  <script>
+    const currentURL = window.location.href;
+    const encoded = encodeURIComponent(currentURL);
+
+    document.getElementById("linkedin-share").href = `https://www.linkedin.com/sharing/share-offsite/?url=${encoded}`;
+    document.getElementById("whatsapp-share").href = `https://wa.me/?text=Check out my project certificate: ${encoded}`;
+    document.getElementById("twitter-share").href = `https://twitter.com/intent/tweet?url=${encoded}&text=Check out my certificate!`;
+    document.getElementById("facebook-share").href = `https://www.facebook.com/sharer/sharer.php?u=${encoded}`;
+    document.getElementById("telegram-share").href = `https://t.me/share/url?url=${encoded}&text=Project Completion Certificate`;
+  </script>
+
+</body>
+</html>

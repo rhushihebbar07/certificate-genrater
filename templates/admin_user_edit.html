@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Edit User</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      background: #f6f8fa;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    nav {
+      background-color: #1e3a8a;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 25px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+
+    nav .logo {
+      font-weight: bold;
+      font-size: 20px;
+      user-select: none;
+    }
+
+    nav .nav-links a {
+      color: white;
+      text-decoration: none;
+      margin-left: 20px;
+      font-weight: 600;
+    }
+
+    nav .nav-links a:hover {
+      color: #93c5fd;
+    }
+
+    form {
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 25px;
+      background: #fff;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      border-radius: 10px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #1e3a8a;
+      margin-bottom: 25px;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: 600;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="number"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      margin-top: 15px;
+    }
+
+    .checkbox-label input[type="checkbox"] {
+      margin-right: 10px;
+    }
+
+    .note {
+      font-size: 13px;
+      color: #777;
+      margin-top: 4px;
+    }
+
+    img {
+      margin-top: 10px;
+      max-width: 150px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      display: block;
+    }
+
+    button {
+      margin-top: 30px;
+      padding: 12px 18px;
+      font-size: 15px;
+      background: #1e3a8a;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      width: 100%;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #2746a3;
+    }
+
+    .flash {
+      margin: 20px auto;
+      max-width: 600px;
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    .flash.success {
+      background-color: #d1fae5;
+      color: #065f46;
+    }
+
+    .flash.error {
+      background-color: #fee2e2;
+      color: #991b1b;
+    }
+
+    @media (max-width: 640px) {
+      form {
+        margin: 20px;
+        padding: 20px;
+      }
+
+      nav {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      nav .nav-links {
+        margin-top: 10px;
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+      }
+
+      nav .nav-links a {
+        margin: 5px 10px 0 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="logo">Certificate System</div>
+    <div class="nav-links">
+      <a href="{{ url_for('dashboard') }}">Dashboard</a>
+      {% if session.get('is_admin') %}
+      <a href="{{ url_for('admin_dashboard') }}">Admin Panel</a>
+      {% endif %}
+      <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+  </nav>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <form method="POST">
+    <h2>Edit User: {{ user.username }}</h2>
+
+    <label for="first_name">First Name</label>
+    <input type="text" id="first_name" name="first_name" value="{{ user.first_name }}" required />
+
+    <label for="last_name">Last Name</label>
+    <input type="text" id="last_name" name="last_name" value="{{ user.last_name }}" required />
+
+    <label for="username">Username</label>
+    <input type="text" id="username" name="username" value="{{ user.username }}" required />
+
+    <label for="email">Email</label>
+    <input type="email" id="email" name="email" value="{{ user.email }}" required />
+
+    <label for="phone">Phone</label>
+    <input type="text" id="phone" name="phone" value="{{ user.phone }}" />
+
+    <label for="age">Age</label>
+    <input type="number" id="age" name="age" value="{{ user.age }}" />
+
+    <label for="class_batch">Class/Batch</label>
+    <input type="text" id="class_batch" name="class_batch" value="{{ user.class_batch }}" />
+
+    <label for="password">Password</label>
+    <input type="text" id="password" name="password" value="{{ user.password }}" />
+    
+    <div class="note">Only fill if you want to update the password.</div>
+
+    <div class="checkbox-label">
+      <input type="checkbox" id="is_admin" name="is_admin" value="1" {% if user.is_admin %}checked{% endif %} />
+      <label for="is_admin">Give admin access to this user</label>
+    </div>
+
+    <label>Profile Picture</label>
+    {% if user.profile_pic %}
+      <img src="{{ url_for('static', filename='profile_pics/' ~ user.profile_pic) }}" alt="Profile Picture" />
+    {% else %}
+      <div class="note">No profile picture uploaded.</div>
+    {% endif %}
+
+    <button type="submit">Save Changes</button>
+  </form>
+
+</body>
+</html>
