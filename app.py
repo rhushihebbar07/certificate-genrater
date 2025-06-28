@@ -25,13 +25,13 @@ from datetime import timedelta
 app.config['SESSION_PERMANENT'] = False
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
 
-# Mail Config
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = 'donotreplay93@gmail.com'
 app.config['MAIL_PASSWORD'] = 'pnai waam mzpp stjd'
-app.config['MAIL_DEFAULT_SENDER'] = 'donotreplay93@gmail.com'  # ✅ Required for Render
+app.config['MAIL_DEFAULT_SENDER'] = app.config['MAIL_USERNAME']  # ✅ This is the fix!
+
 
 mail = Mail(app)
 
