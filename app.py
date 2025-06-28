@@ -24,9 +24,14 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = os.getenv("MAIL_USERNAME")
-app.config['MAIL_PASSWORD'] = os.getenv("MAIL_PASSWORD")
-app.config['MAIL_DEFAULT_SENDER'] = 'donotreplay93@gmail.com'
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'donotreplay93@gmail.com'
+app.config['MAIL_PASSWORD'] = 'pnai waam mzpp stjd'
+app.config['MAIL_DEFAULT_SENDER'] = app.config['MAIL_USERNAME']  # ✅ required
+
+
 
 mail = Mail(app)
 serializer = URLSafeTimedSerializer(app.secret_key)
@@ -79,58 +84,57 @@ def login():
 
         flash("Invalid email or password", "error")
     return render_template("login.html")
+from flask import url_for
 
+def send_certificate_email(name, email, cert_url):
+    with app.app_context():  # ✅ Ensure url_for works outside request context
+        logo_url = url_for('static', filename='profile_pics/1735566765566.png', _external=True)
+        banner_url = "https://yourdomain.com/static/certificate_banner.png"
+        signature_url = "https://yourdomain.com/static/principal_sign.png"
 
+    try:
+        msg = Message(
+            subject="🎓 Your Certificate is Ready - SMS College",
+            sender=app.config['MAIL_USERNAME'],  # ✅ Ensures sender
+            recipients=[email]
+        )
 
-ddef send_certificate_email(name, email, cert_url):
-    # ✅ Local logo image path (if served locally) or remote fallback
-    logo_url = url_for('static', filename='profile_pics/1735566765566.png', _external=True)
-    banner_url = "https://yourdomain.com/static/certificate_banner.png"  # Optional
-    signature_url = "https://yourdomain.com/static/principal_sign.png"   # Optional
-
-    msg = Message(
-        subject="🎓 Your Certificate is Ready - SMS College",
-        sender=app.config['MAIL_USERNAME'],  # ✅ Ensures sender is defined
-        recipients=[email]
-    )
-
-    msg.html = f"""
-    <div style="font-family: 'Segoe UI', sans-serif; color: #1e293b; max-width: 600px; margin: auto; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden;">
-        <div style="padding: 20px; text-align: center; background-color: #f8fafc;">
-            <img src="{logo_url}" alt="SMS College Logo" style="max-height: 80px; margin-bottom: 10px;">
-            <h2 style="color: #2563eb; margin: 0;">Saint Mary's Syrian College</h2>
-            <p style="margin: 0; font-weight: 500;">Department of Computer Applications</p>
-        </div>
-
-        <div style="padding: 30px; background-color: #ffffff;">
-            <img src="{banner_url}" alt="Certificate Banner" style="width: 100%; border-radius: 10px; margin-bottom: 20px;">
-
-            <h3 style="color: #0f172a;">🎉 Congratulations, {name}!</h3>
-            <p style="font-size: 16px;">Your GitHub project has been <strong>successfully approved</strong> by our team.</p>
-            <p style="font-size: 15px;">You can now download or view your official certificate using the button below.</p>
-
-            <div style="text-align: center; margin: 25px 0;">
-                <a href="{cert_url}" target="_blank" style="background-color: #2563eb; color: #ffffff; padding: 14px 30px; font-size: 16px; text-decoration: none; border-radius: 8px; font-weight: bold;">📄 View Certificate</a>
+        msg.html = f"""
+        <div style="font-family: 'Segoe UI', sans-serif; color: #1e293b; max-width: 600px; margin: auto; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden;">
+            <div style="padding: 20px; text-align: center; background-color: #f8fafc;">
+                <img src="{logo_url}" alt="SMS College Logo" style="max-height: 80px; margin-bottom: 10px;">
+                <h2 style="color: #2563eb; margin: 0;">Saint Mary's Syrian College</h2>
+                <p style="margin: 0; font-weight: 500;">Department of Computer Applications</p>
             </div>
 
-            <p style="font-size: 15px; color: #334155;">If you face any issues, feel free to contact our department.</p>
+            <div style="padding: 30px; background-color: #ffffff;">
+                <img src="{banner_url}" alt="Certificate Banner" style="width: 100%; border-radius: 10px; margin-bottom: 20px;">
 
-            <div style="margin-top: 30px;">
-                <img src="{signature_url}" alt="Principal Signature" style="height: 60px;"><br>
-                <p style="font-size: 14px; margin-top: 5px;">Principal<br>SMS College</p>
+                <h3 style="color: #0f172a;">🎉 Congratulations, {name}!</h3>
+                <p style="font-size: 16px;">Your GitHub project has been <strong>successfully approved</strong> by our team.</p>
+                <p style="font-size: 15px;">You can now download or view your official certificate using the button below.</p>
+
+                <div style="text-align: center; margin: 25px 0;">
+                    <a href="{cert_url}" target="_blank" style="background-color: #2563eb; color: #ffffff; padding: 14px 30px; font-size: 16px; text-decoration: none; border-radius: 8px; font-weight: bold;">📄 View Certificate</a>
+                </div>
+
+                <p style="font-size: 15px; color: #334155;">If you face any issues, feel free to contact our department.</p>
+
+                <div style="margin-top: 30px;">
+                    <img src="{signature_url}" alt="Principal Signature" style="height: 60px;"><br>
+                    <p style="font-size: 14px; margin-top: 5px;">Principal<br>SMS College</p>
+                </div>
+            </div>
+
+            <div style="padding: 20px; text-align: center; font-size: 13px; background-color: #f1f5f9; color: #64748b;">
+                &copy; 2025 Saint Mary's Syrian College · All rights reserved<br>
+                <a href="https://smscollege.edu" style="color: #2563eb; text-decoration: none;">smscollege.edu</a>
             </div>
         </div>
-
-        <div style="padding: 20px; text-align: center; font-size: 13px; background-color: #f1f5f9; color: #64748b;">
-            &copy; 2025 Saint Mary's Syrian College · All rights reserved<br>
-            <a href="https://smscollege.edu" style="color: #2563eb; text-decoration: none;">smscollege.edu</a>
-        </div>
-    </div>
-    """
-    mail.send(msg)
-
-
-
+        """
+        mail.send(msg)
+    except Exception as e:
+        print(f"❌ Failed to send certificate email to {email}: {e}")
 
 @app.route("/admin/export-users")
 def export_users():
