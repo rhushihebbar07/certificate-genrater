@@ -26,6 +26,7 @@ app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = os.getenv("MAIL_USERNAME")
 app.config['MAIL_PASSWORD'] = os.getenv("MAIL_PASSWORD")
+app.config['MAIL_DEFAULT_SENDER'] = 'donotreplay93@gmail.com'
 
 mail = Mail(app)
 serializer = URLSafeTimedSerializer(app.secret_key)
@@ -81,14 +82,15 @@ def login():
 
 
 
-def send_certificate_email(name, email, cert_url):
-    logo_url = "static/profile_pics/1735566765566.png"  # 🔁 replace with your logo
-    banner_url = "https://yourdomain.com/static/certificate_banner.png"  # 🔁 optional banner
-    signature_url = "https://yourdomain.com/static/principal_sign.png"  # 🔁 optional signature
+ddef send_certificate_email(name, email, cert_url):
+    # ✅ Local logo image path (if served locally) or remote fallback
+    logo_url = url_for('static', filename='profile_pics/1735566765566.png', _external=True)
+    banner_url = "https://yourdomain.com/static/certificate_banner.png"  # Optional
+    signature_url = "https://yourdomain.com/static/principal_sign.png"   # Optional
 
     msg = Message(
         subject="🎓 Your Certificate is Ready - SMS College",
-        sender=app.config['MAIL_USERNAME'],
+        sender=app.config['MAIL_USERNAME'],  # ✅ Ensures sender is defined
         recipients=[email]
     )
 
@@ -126,6 +128,7 @@ def send_certificate_email(name, email, cert_url):
     </div>
     """
     mail.send(msg)
+
 
 
 
