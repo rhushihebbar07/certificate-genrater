@@ -466,6 +466,7 @@ def revoke_admin(user_id):
 def init_admin():
     conn = get_db_connection()
 
+    # Create tables
     conn.execute('''CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         first_name TEXT, last_name TEXT, username TEXT,
@@ -480,8 +481,8 @@ def init_admin():
         github_url TEXT,
         project_title TEXT,
         cert_file TEXT,
-        is_approved INTEGER DEFAULT 0,
         submitted_on TEXT,
+        is_approved INTEGER DEFAULT 0,
         FOREIGN KEY(user_id) REFERENCES users(id)
     )''')
 
@@ -493,21 +494,16 @@ def init_admin():
         user_agent TEXT,
         location TEXT,
         login_time TEXT,
-        logout_time TEXT,
-        FOREIGN KEY(user_id) REFERENCES users(id)
+        logout_time TEXT
     )''')
 
-    # ✅ Patch missing columns in login_logs table
+    # Alter table only if needed
     try:
         conn.execute("ALTER TABLE login_logs ADD COLUMN timestamp TEXT")
     except sqlite3.OperationalError:
-        pass  # column already exists
+        pass  # Already exists
 
-    try:
-        conn.execute("ALTER TABLE projects ADD COLUMN is_approved INTEGER DEFAULT 0")
-    except sqlite3.OperationalError:
-        pass
-
+    # Create default admin if not exists
     admin = conn.execute("SELECT * FROM users WHERE email = 'admin@smscollege.edu'").fetchone()
     if not admin:
         conn.execute('''INSERT INTO users (
@@ -517,9 +513,11 @@ def init_admin():
             "Admin", "Account", "admin", "admin@smscollege.edu",
             "0000000000", 0, "Admin", "", "smsbcabvr"
         ))
+        print("[INFO] Default admin created.")
         conn.commit()
 
     conn.close()
+    print("[INFO] Database initialized successfully.")
 
     
 @app.route("/profile")
