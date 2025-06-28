@@ -48,6 +48,7 @@ app.config['MAIL_PASSWORD'] = 'pnai waam mzpp stjd'
 app.config['MAIL_DEFAULT_SENDER'] = app.config['MAIL_USERNAME']  # ✅ This is the fix!
 
 
+
 mail = Mail(app)
 
 
@@ -78,6 +79,13 @@ def root_redirect():
 
 from datetime import datetime
 from flask import request
+
+@app.route("/admin/online-users")
+def admin_online_users():
+    # Return JSON of currently online users or dummy for now
+    return {"status": "ok", "online": []}
+
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -455,58 +463,74 @@ def revoke_admin(user_id):
 def init_admin():
     conn = get_db_connection()
 
-    # Create tables
-    conn.execute('''CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        first_name TEXT, last_name TEXT, username TEXT,
-        email TEXT UNIQUE, phone TEXT, age INTEGER,
-        class_batch TEXT, profile_pic TEXT,
-        password TEXT, is_admin INTEGER DEFAULT 0
-    )''')
+    # ✅ Ensure users table
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            first_name TEXT, last_name TEXT, username TEXT,
+            email TEXT UNIQUE, phone TEXT, age INTEGER,
+            class_batch TEXT, profile_pic TEXT,
+            password TEXT, is_admin INTEGER DEFAULT 0
+        )
+    ''')
 
-    conn.execute('''CREATE TABLE IF NOT EXISTS projects (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER,
-        github_url TEXT,
-        project_title TEXT,
-        cert_file TEXT,
-        submitted_on TEXT,
-        is_approved INTEGER DEFAULT 0,
-        FOREIGN KEY(user_id) REFERENCES users(id)
-    )''')
+    # ✅ Ensure projects table
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS projects (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            github_url TEXT,
+            project_title TEXT,
+            cert_file TEXT,
+            submitted_on TEXT,
+            is_approved INTEGER DEFAULT 0,
+            FOREIGN KEY(user_id) REFERENCES users(id)
+        )
+    ''')
 
-    conn.execute('''CREATE TABLE IF NOT EXISTS login_logs (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER,
-        email TEXT,
-        ip TEXT,
-        user_agent TEXT,
-        location TEXT,
-        login_time TEXT,
-        logout_time TEXT
-    )''')
+    # ✅ Ensure login_logs table
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS login_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            email TEXT,
+            ip TEXT,
+            user_agent TEXT,
+            location TEXT,
+            login_time TEXT,
+            logout_time TEXT
+        )
+    ''')
 
-    # Alter table only if needed
+    # ✅ Patch: Add missing column if not exists
     try:
         conn.execute("ALTER TABLE login_logs ADD COLUMN timestamp TEXT")
     except sqlite3.OperationalError:
-        pass  # Already exists
+        pass  # Column already exists
 
-    # Create default admin if not exists
+    # ✅ Create default admin
     admin = conn.execute("SELECT * FROM users WHERE email = 'admin@smscollege.edu'").fetchone()
     if not admin:
-        conn.execute('''INSERT INTO users (
-            first_name, last_name, username, email, phone,
-            age, class_batch, profile_pic, password, is_admin
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)''', (
+        conn.execute('''
+            INSERT INTO users (
+                first_name, last_name, username, email, phone,
+                age, class_batch, profile_pic, password, is_admin
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
+        ''', (
             "Admin", "Account", "admin", "admin@smscollege.edu",
             "0000000000", 0, "Admin", "", "smsbcabvr"
         ))
-        print("[INFO] Default admin created.")
-        conn.commit()
+        print("[INFO] ✅ Default admin created.")
 
+    # ✅ Ensure certs folder exists
+    if not os.path.exists("certs"):
+        os.makedirs("certs")
+        print("[INFO] Created missing 'certs/' folder.")
+
+    conn.commit()
     conn.close()
-    print("[INFO] Database initialized successfully.")
+    print("[INFO] ✅ Database initialized successfully.")
+
 
     
 @app.route("/profile")
