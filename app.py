@@ -14,7 +14,11 @@ from itsdangerous import URLSafeTimedSerializer
 from weasyprint import HTML
 
 # ✅ Custom function for sending emails via SMTP
+# REMOVE these if using smtplib-based email sender
+# from flask_mail import Mail, Message
+
 from utils.email_sender import send_certificate_email
+
 
 
 

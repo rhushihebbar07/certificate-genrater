@@ -1,19 +1,29 @@
-def send_certificate_email(name, email, cert_url):
-    logo_url = url_for('static', filename='profile_pics/1735566765566.png', _external=True)
+# utils/email_sender.py
+import smtplib
+from email.message import EmailMessage
 
-    msg = Message(
-        subject="🎓 Your Certificate is Ready - SMS College",
-        sender=app.config['MAIL_USERNAME'],  # ✅ Explicit sender required for Render
-        recipients=[email]
-    )
+def send_certificate_email(name, recipient_email, cert_url):
+    msg = EmailMessage()
+    msg["Subject"] = "🎓 Your Project Completion Certificate - SMS College"
+    msg["From"] = "donotreplay93@gmail.com"  # ✅ Explicit sender required
+    msg["To"] = recipient_email
 
-    msg.html = f"""
-    <div style='font-family: Arial, sans-serif; max-width:600px; margin:auto;'>
-        <h2 style='color:#2563eb;'>Hi {name},</h2>
-        <p>🎉 Your project certificate is ready. View or download it below:</p>
-        <p><a href="{cert_url}" style="background:#2563eb;color:white;padding:10px 20px;border-radius:5px;text-decoration:none;">📄 View Certificate</a></p>
-        <br>
-        <p>Regards,<br>SMS College</p>
-    </div>
-    """
-    mail.send(msg)
+    msg.set_content(f"Hi {name},\n\nYour certificate is ready at: {cert_url}")
+
+    msg.add_alternative(f"""
+    <html>
+      <body>
+        <h3>Hi {name},</h3>
+        <p>Your GitHub project has been approved.</p>
+        <p><a href="{cert_url}">View Your Certificate</a></p>
+        <br><p>Regards,<br>SMS College</p>
+      </body>
+    </html>
+    """, subtype='html')
+
+    try:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
+            smtp.login("donotreplay93@gmail.com", "pnai waam mzpp stjd")
+            smtp.send_message(msg)
+    except Exception as e:
+        print(f"Email error: {e}")
