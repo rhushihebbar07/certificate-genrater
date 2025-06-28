@@ -282,34 +282,47 @@ def admin_dashboard():
                            approved_count=approved_count,
                            pending_count=pending_count,
                            all_users=all_users)  # 👈 PASS TO TEMPLATE
+    
 @app.route("/admin/approve-project/<int:project_id>")
 def approve_project(project_id):
     if not session.get("is_admin"):
         return redirect(url_for("login"))
-    
+
     conn = get_db_connection()
-    project = conn.execute('''SELECT p.*, u.first_name, u.email
-                              FROM projects p JOIN users u ON p.user_id = u.id
-                              WHERE p.id = ?''', (project_id,)).fetchone()
+    project = conn.execute('''
+        SELECT p.*, u.first_name, u.email
+        FROM projects p JOIN users u ON p.user_id = u.id
+        WHERE p.id = ?
+    ''', (project_id,)).fetchone()
+
     if not project:
         conn.close()
-        return "Project not found", 404
+        return "❌ Project not found", 404
 
     cert_id = str(uuid.uuid4())[:8]
     cert_filename = f"{cert_id}.pdf"
     cert_path = os.path.join("certs", cert_filename)
-    cert_url = f"http://localhost:5000/certs/{cert_filename}"
 
-    rendered = render_template("certificate.html", name=project["first_name"],
-                               repo_title=project["project_title"],
-                               github_url=project["github_url"],
-                               date=datetime.now().strftime("%d %B %Y"))
+    # Generate certificate
+    rendered = render_template("certificate.html",
+        name=project["first_name"],
+        repo_title=project["project_title"],
+        github_url=project["github_url"],
+        date=datetime.now().strftime("%d %B %Y")
+    )
     HTML(string=rendered, base_url='.').write_pdf(cert_path)
 
-    # ✅ Un-commented: Send the certificate email
-    send_certificate_email(project["first_name"], project["email"], cert_url)
+    # Generate full public certificate URL
+    cert_url = url_for('serve_certificate', filename=cert_filename, _external=True)
 
-    conn.execute("UPDATE projects SET is_approved = 1, cert_file = ? WHERE id = ?", (cert_filename, project_id))
+    try:
+        send_certificate_email(project["first_name"], project["email"], cert_url)
+    except Exception as e:
+        flash(f"⚠️ Email sending failed: {str(e)}", "error")
+
+    conn.execute('''
+        UPDATE projects SET is_approved = 1, cert_file = ? WHERE id = ?
+    ''', (cert_filename, project_id))
     conn.commit()
     conn.close()
 
