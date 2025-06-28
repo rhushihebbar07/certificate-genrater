@@ -12,5 +12,5 @@ certificates/
 # Ignore all uploaded profile pictures
 static/profile_pics/
 
-users.db
+
 static/profile_pics/
