@@ -3,10 +3,21 @@ import uuid
 import sqlite3
 import pandas as pd
 from datetime import datetime, timedelta
-from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory, send_file
+
+from flask import (
+    Flask, render_template, request, redirect,
+    url_for, session, flash, send_from_directory, send_file
+)
+
 from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer
 from weasyprint import HTML
+
+# ✅ Custom function for sending emails via SMTP
+from utils.email_sender import send_certificate_email
+
+
+
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -283,6 +294,7 @@ def admin_dashboard():
                            pending_count=pending_count,
                            all_users=all_users)  # 👈 PASS TO TEMPLATE
     
+
 @app.route("/admin/approve-project/<int:project_id>")
 def approve_project(project_id):
     if not session.get("is_admin"):
@@ -303,7 +315,7 @@ def approve_project(project_id):
     cert_filename = f"{cert_id}.pdf"
     cert_path = os.path.join("certs", cert_filename)
 
-    # Generate certificate
+    # Generate the certificate
     rendered = render_template("certificate.html",
         name=project["first_name"],
         repo_title=project["project_title"],
@@ -312,13 +324,14 @@ def approve_project(project_id):
     )
     HTML(string=rendered, base_url='.').write_pdf(cert_path)
 
-    # Generate full public certificate URL
+    # ✅ Use full external URL for Render deployment
     cert_url = url_for('serve_certificate', filename=cert_filename, _external=True)
 
     try:
         send_certificate_email(project["first_name"], project["email"], cert_url)
+        flash("✅ Certificate emailed successfully.", "success")
     except Exception as e:
-        flash(f"⚠️ Email sending failed: {str(e)}", "error")
+        flash(f"⚠️ Email sending failed: {e}", "error")
 
     conn.execute('''
         UPDATE projects SET is_approved = 1, cert_file = ? WHERE id = ?
@@ -326,7 +339,6 @@ def approve_project(project_id):
     conn.commit()
     conn.close()
 
-    flash("✅ Project approved and certificate sent.", "success")
     return redirect(url_for("admin_dashboard"))
 
 
