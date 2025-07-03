@@ -30,12 +30,12 @@
 
 ## 🧩 User Roles
 
-| Role          | Permissions                                                           |
-|---------------|------------------------------------------------------------------------|
-| 👨‍🎓 **Student**     | Default role — uploads project link                                 |
-| 👩‍🏫 **Lecturer**    | Reviews & approves projects via dashboard                           |
-| 🛠️ **Admin**        | Can approve projects, view/edit registered users, manage dashboard |
-| 🧑‍💼 **Super Admin** | Assigns roles (Lecturer/Admin), oversees entire application         |
+| Role           | Permissions                                                           |
+|----------------|------------------------------------------------------------------------|
+| 👨‍🎓 Student       | Default role — uploads project link                                 |
+| 👩‍🏫 Lecturer      | Reviews & approves projects via dashboard                           |
+| 🛠️ Admin          | Can approve projects, view/edit registered users, manage dashboard |
+| 🧑‍💼 Super Admin   | Assigns roles (Lecturer/Admin), oversees entire application         |
 
 ---
 
@@ -46,17 +46,22 @@ graph TD
 A[Student Uploads GitHub Project] --> B[Lecturer/Admin Reviews]
 B --> C[On Approval, Certificate is Generated]
 C --> D[Certificate is Sent via SMTP to Student]
+```
 
+---
 
-🛠️ Built With
-🐍 Python + Flask
+## 🛠️ Built With
 
-💾 SQLite3 Database
+- 🐍 Python + Flask  
+- 💾 SQLite3 Database  
+- 🎨 HTML5, CSS3, Bootstrap  
+- ✉️ Flask-Mail (SMTP Emailing)  
 
-🎨 HTML5, CSS3, Bootstrap
+---
 
-✉️ Flask-Mail (SMTP Emailing)
+## 📁 Project Structure
 
+```
 📦 certificate-genrater/
 ├── static/
 │   └── profile_pics/       # ⛔ Ignored in repo
@@ -68,39 +73,48 @@ C --> D[Certificate is Sent via SMTP to Student]
 ├── database.db             # 📦 SQLite DB (local only)
 ├── .env                    # 🔐 Hidden credentials
 └── README.md               # 📖 This file
+```
 
-🔐 Security
-.env and profile_pics/ are hidden via .gitignore
+---
 
-SMTP credentials are securely stored
+## 🔐 Security
 
-Only authorized roles can approve or modify data
+- `.env` and `profile_pics/` are hidden via `.gitignore`  
+- SMTP credentials are securely stored  
+- Only authorized roles can approve or modify data  
 
-🧠 ChatGPT Involvement
-This project was developed with assistance and code-generation support from ChatGPT for:
+---
 
-Designing clean Flask routes and templates
+## 🧠 ChatGPT Involvement
 
-Handling user role logic
+This project was developed with assistance and code-generation support from **ChatGPT**, including:
 
-Crafting the SMTP certificate delivery system
+- Designing clean Flask routes and templates  
+- Handling user role logic  
+- Crafting the SMTP certificate delivery system  
+- Writing this stylish, professional `README.md` 🎉  
 
-Writing this stylish, professional README.md 🎉
-📫 Author
-Rhushi Hebbar
-📧 rhushihebbar22@gmail.com
-🔗 GitHub Profile
+---
 
-⚡ Future Enhancements
-🌐 Deploy to Render/Heroku
+## 📫 Author
 
-📥 Certificate archive history
+**Rhushi Hebbar**  
+📧 [rhushihebbar22@gmail.com](mailto:rhushihebbar22@gmail.com)  
+🔗 [GitHub Profile](https://github.com/rhushihebbar07)
 
-📊 Analytics dashboard for admin
+---
 
-🎓 College-wide team collaboration & leaderboard
+## ⚡ Future Enhancements
 
-📝 License
-Licensed under the MIT License.
+- 🌐 Deploy to Render/Heroku  
+- 📥 Certificate archive history  
+- 📊 Analytics dashboard for admin  
+- 🎓 College-wide team collaboration & leaderboard  
 
-© 2025 Rhushi Hebbar. All rights reserved.
+---
+
+## 📝 License
+
+Licensed under the [MIT License](LICENSE).
+
+> © 2025 Rhushi Hebbar. All rights reserved.
