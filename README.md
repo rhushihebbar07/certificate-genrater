@@ -9,33 +9,33 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/github/repo-size/rhushihebbar07/certificate-genrater?style=flat-square">
-  <img src="https://img.shields.io/github/last-commit/rhushihebbar07/certificate-genrater?style=flat-square">
-  <img src="https://img.shields.io/badge/Made%20With-Flask-blue?style=flat-square">
-  <img src="https://img.shields.io/badge/SMTP-Enabled-green?style=flat-square">
-  <img src="https://img.shields.io/badge/Built%20with-ChatGPT-ff69b4?style=flat-square">
+  <img src="https://img.shields.io/github/repo-size/rhushihebbar07/certificate-genrater?style=for-the-badge">
+  <img src="https://img.shields.io/github/last-commit/rhushihebbar07/certificate-genrater?style=for-the-badge">
+  <img src="https://img.shields.io/badge/Flask%20App-Python-blue?style=for-the-badge">
+  <img src="https://img.shields.io/badge/SMTP%20Enabled-Yes-green?style=for-the-badge">
+  <img src="https://img.shields.io/badge/Powered_by-ChatGPT-ff69b4?style=for-the-badge">
 </p>
 
 ---
 
 ## 🚀 Project Overview
 
-- 🔗 Upload GitHub project link  
-- 👥 Four powerful user roles with custom dashboards  
-- 📨 Auto-generate & send certificates using SMTP  
-- 🔐 Secure login, clean interface, and role access control  
-- ⚡ Built efficiently with help from **ChatGPT**  
+✨ Upload GitHub project links with ease  
+👥 Four distinct roles for seamless approval workflow  
+📧 Automatic certificate generation + email delivery  
+🛡️ Secure, elegant, and responsive Flask web app  
+🤖 ChatGPT-assisted development
 
 ---
 
 ## 🧩 User Roles
 
-| Role           | Permissions                                                           |
+| Role           | Description                                                            |
 |----------------|------------------------------------------------------------------------|
-| 👨‍🎓 Student       | Default role — uploads project link                                 |
-| 👩‍🏫 Lecturer      | Reviews & approves projects via dashboard                           |
-| 🛠️ Admin          | Can approve projects, view/edit registered users, manage dashboard |
-| 🧑‍💼 Super Admin   | Assigns roles (Lecturer/Admin), oversees entire application         |
+| 👨‍🎓 Student       | Default role — uploads project links                                 |
+| 👩‍🏫 Lecturer      | Reviews & approves projects in lecturer dashboard                    |
+| 🛠️ Admin          | Can approve, edit users, view stats, manage dashboard                |
+| 🧑‍💼 Super Admin   | Assigns roles to users and oversees entire platform                   |
 
 ---
 
@@ -55,7 +55,7 @@ C --> D[Certificate is Sent via SMTP to Student]
 - 🐍 Python + Flask  
 - 💾 SQLite3 Database  
 - 🎨 HTML5, CSS3, Bootstrap  
-- ✉️ Flask-Mail (SMTP Emailing)  
+- ✉️ Flask-Mail for SMTP integration  
 
 ---
 
@@ -77,22 +77,22 @@ C --> D[Certificate is Sent via SMTP to Student]
 
 ---
 
-## 🔐 Security
+## 🔐 Security Features
 
-- `.env` and `profile_pics/` are hidden via `.gitignore`  
-- SMTP credentials are securely stored  
-- Only authorized roles can approve or modify data  
+- `.env` and `profile_pics/` are safely ignored via `.gitignore`
+- SMTP credentials securely stored in environment
+- Role-based access restricts actions to authorized users only
 
 ---
 
 ## 🧠 ChatGPT Involvement
 
-This project was developed with assistance and code-generation support from **ChatGPT**, including:
+This project was made efficient and professional with assistance from **ChatGPT**, including:
 
-- Designing clean Flask routes and templates  
-- Handling user role logic  
-- Crafting the SMTP certificate delivery system  
-- Writing this stylish, professional `README.md` 🎉  
+- Flask route logic and template design  
+- Role-based access & security checks  
+- SMTP-based emailing system  
+- 📝 This animated, stylish `README.md`
 
 ---
 
@@ -106,10 +106,10 @@ This project was developed with assistance and code-generation support from **Ch
 
 ## ⚡ Future Enhancements
 
-- 🌐 Deploy to Render/Heroku  
-- 📥 Certificate archive history  
-- 📊 Analytics dashboard for admin  
-- 🎓 College-wide team collaboration & leaderboard  
+- 🌍 Live deployment on Render/Heroku  
+- 🗃️ Certificate archive + search  
+- 📈 Admin analytics dashboard  
+- 🏆 Leaderboard and team project features  
 
 ---
 
