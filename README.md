@@ -47,6 +47,7 @@ A[Student Uploads GitHub Project] --> B[Lecturer/Admin Reviews]
 B --> C[On Approval, Certificate is Generated]
 C --> D[Certificate is Sent via SMTP to Student]
 
+
 🛠️ Built With
 🐍 Python + Flask
 
