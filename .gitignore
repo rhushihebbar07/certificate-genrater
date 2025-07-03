@@ -35,3 +35,9 @@ static/profile_pics/
 # Compiled static files
 static/__pycache__/
 templates/__pycache__/
+
+# Hide profile images
+static/profile_pics/
+*.jpg
+*.jpeg
+*.png
