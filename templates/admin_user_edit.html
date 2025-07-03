@@ -97,6 +97,21 @@
       display: block;
     }
 
+    .download-btn {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 6px 12px;
+      background-color: #1e3a8a;
+      color: white;
+      border-radius: 4px;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .download-btn:hover {
+      background-color: #2746a3;
+    }
+
     button {
       margin-top: 30px;
       padding: 12px 18px;
@@ -161,7 +176,7 @@
     <div class="logo">Certificate System</div>
     <div class="nav-links">
       <a href="{{ url_for('dashboard') }}">Dashboard</a>
-      {% if session.get('is_admin') %}
+      {% if session.get('is_admin') or session.get('is_superadmin') %}
       <a href="{{ url_for('admin_dashboard') }}">Admin Panel</a>
       {% endif %}
       <a href="{{ url_for('logout') }}">Logout</a>
@@ -213,6 +228,11 @@
     <label>Profile Picture</label>
     {% if user.profile_pic %}
       <img src="{{ url_for('static', filename='profile_pics/' ~ user.profile_pic) }}" alt="Profile Picture" />
+      {% if session.get('is_superadmin') %}
+      <a href="{{ url_for('download_profile_pic', filename=user.profile_pic) }}" class="download-btn" download>
+        Download Profile Picture
+      </a>
+      {% endif %}
     {% else %}
       <div class="note">No profile picture uploaded.</div>
     {% endif %}

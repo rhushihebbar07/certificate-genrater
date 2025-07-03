@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Lecturer Dashboard{% endblock %}
+{% block content %}
+<div class="container mt-5">
+  <h2>📋 Lecturer Dashboard</h2>
+  <table class="table table-dark table-striped">
+    <thead>
+      <tr>
+        <th>Project Title</th>
+        <th>GitHub URL</th>
+        <th>Submitted By</th>
+        <th>Approve</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for project in projects %}
+      <tr>
+        <td>{{ project.project_title }}</td>
+        <td><a href="{{ project.github_url }}" target="_blank">{{ project.github_url }}</a></td>
+        <td>{{ project.username }} ({{ project.email }})</td>
+        <td>
+          <a href="{{ url_for('lecturer_approve_project', project_id=project.id) }}" class="btn btn-sm btn-success">Approve</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

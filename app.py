@@ -3,25 +3,11 @@ import uuid
 import sqlite3
 import pandas as pd
 from datetime import datetime, timedelta
-
-from flask import (
-    Flask, render_template, request, redirect,
-    url_for, session, flash, send_from_directory, send_file
-)
-
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory, send_file
 from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer
 from weasyprint import HTML
-
-# ✅ Custom function for sending emails via SMTP
-# REMOVE these if using smtplib-based email sender
-# from flask_mail import Mail, Message
-
-from utils.email_sender import send_certificate_email
-
-
-
-
+from decorators import admin_required
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -34,24 +20,13 @@ load_dotenv()  # Loads .env file
 app.secret_key = os.getenv("SECRET_KEY", "fallbacksecretkey")
 
 
-from datetime import timedelta
-
-# Session Config
 app.config['SESSION_PERMANENT'] = False
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
-
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'donotreplay93@gmail.com'
-app.config['MAIL_PASSWORD'] = 'pnai waam mzpp stjd'
-app.config['MAIL_DEFAULT_SENDER'] = app.config['MAIL_USERNAME']  # ✅ This is the fix!
-
-
-
-mail = Mail(app)
-
-
+app.config['MAIL_USERNAME'] = os.getenv("MAIL_USERNAME")
+app.config['MAIL_PASSWORD'] = os.getenv("MAIL_PASSWORD")
 
 mail = Mail(app)
 serializer = URLSafeTimedSerializer(app.secret_key)
@@ -65,6 +40,7 @@ def get_db_connection():
     conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row
     return conn
+
 
 @app.before_request
 def set_session_behavior():
@@ -80,17 +56,12 @@ def root_redirect():
 from datetime import datetime
 from flask import request
 
-@app.route("/admin/online-users")
-def admin_online_users():
-    # Return JSON of currently online users or dummy for now
-    return {"status": "ok", "online": []}
-
-
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        email = request.form["email"]
+        email = request.form["email"].strip().lower()
         password = request.form["password"]
+
         conn = get_db_connection()
         user = conn.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
         conn.close()
@@ -100,17 +71,74 @@ def login():
             session.update({
                 "user_id": user["id"],
                 "email": user["email"],
-                "is_admin": bool(user["is_admin"]),
                 "username": user["username"],
                 "profile_pic": user["profile_pic"] or "default.png",
-                "view_as_admin": bool(user["is_admin"]),
-                "just_logged_in": True  # ✅ put it here
+                "role": user["role"] if "role" in user.keys() else "student",
+                "is_admin": user["role"] == "admin" if "role" in user.keys() else False,
+                "is_superadmin": user["is_superadmin"] == 1 if "is_superadmin" in user.keys() else False,
+                "view_as_admin": user["role"] == "admin" if "role" in user.keys() else False,
+                "just_logged_in": True
             })
-            flash(f"Welcome back, {user['username']}!", "success")
-            return redirect(url_for("admin_dashboard" if user["is_admin"] else "dashboard"))
 
-        flash("Invalid email or password", "error")
+            flash(f"✅ Welcome back, {user['username']}!", "success")
+
+            if session["is_admin"] or session["is_superadmin"]:
+                return redirect(url_for("admin_dashboard"))
+            else:
+                return redirect(url_for("dashboard"))
+
+        flash("❌ Invalid email or password", "error")
+
     return render_template("login.html")
+
+
+def send_certificate_email(name, email, cert_url):
+    logo_url = "static/profile_pics/1735566765566.png"  # 🔁 replace with your logo
+    banner_url = "https://yourdomain.com/static/certificate_banner.png"  # 🔁 optional banner
+    signature_url = "https://yourdomain.com/static/principal_sign.png"  # 🔁 optional signature
+
+    msg = Message(
+        subject="🎓 Your Certificate is Ready - SMS College",
+        sender=app.config['MAIL_USERNAME'],
+        recipients=[email]
+    )
+
+    msg.html = f"""
+    <div style="font-family: 'Segoe UI', sans-serif; color: #1e293b; max-width: 600px; margin: auto; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden;">
+        <div style="padding: 20px; text-align: center; background-color: #f8fafc;">
+            <img src="{logo_url}" alt="SMS College Logo" style="max-height: 80px; margin-bottom: 10px;">
+            <h2 style="color: #2563eb; margin: 0;">Saint Mary's Syrian College</h2>
+            <p style="margin: 0; font-weight: 500;">Department of Computer Applications</p>
+        </div>
+
+        <div style="padding: 30px; background-color: #ffffff;">
+            <img src="{banner_url}" alt="Certificate Banner" style="width: 100%; border-radius: 10px; margin-bottom: 20px;">
+
+            <h3 style="color: #0f172a;">🎉 Congratulations, {name}!</h3>
+            <p style="font-size: 16px;">Your GitHub project has been <strong>successfully approved</strong> by our team.</p>
+            <p style="font-size: 15px;">You can now download or view your official certificate using the button below.</p>
+
+            <div style="text-align: center; margin: 25px 0;">
+                <a href="{cert_url}" target="_blank" style="background-color: #2563eb; color: #ffffff; padding: 14px 30px; font-size: 16px; text-decoration: none; border-radius: 8px; font-weight: bold;">📄 View Certificate</a>
+            </div>
+
+            <p style="font-size: 15px; color: #334155;">If you face any issues, feel free to contact our department.</p>
+
+            <div style="margin-top: 30px;">
+                <img src="{signature_url}" alt="Principal Signature" style="height: 60px;"><br>
+                <p style="font-size: 14px; margin-top: 5px;">Principal<br>SMS College</p>
+            </div>
+        </div>
+
+        <div style="padding: 20px; text-align: center; font-size: 13px; background-color: #f1f5f9; color: #64748b;">
+            &copy; 2025 Saint Mary's Syrian College · All rights reserved<br>
+            <a href="https://smscollege.edu" style="color: #2563eb; text-decoration: none;">smscollege.edu</a>
+        </div>
+    </div>
+    """
+    mail.send(msg)
+
+
 
 @app.route("/admin/export-users")
 def export_users():
@@ -261,22 +289,31 @@ def reset_all_projects():
 
 @app.route("/admin")
 def admin_dashboard():
-    if not session.get("is_admin"):
+    # Allow only superadmin, admin, or lecturer
+    if not (session.get("is_superadmin") or session.get("role") in ["admin", "lecturer"]):
+        flash("❌ Unauthorized access.", "error")
         return redirect(url_for("login"))
 
     conn = get_db_connection()
 
-    # Get all users
-    users = conn.execute("SELECT * FROM users").fetchall()
+    # Fetch all users (only for admin/superadmin)
+    if session.get("is_superadmin") or session.get("role") == "admin":
+        users = conn.execute("SELECT * FROM users").fetchall()
+    else:
+        users = []
 
-    # Get projects
-    projects = conn.execute('''SELECT p.*, u.username, u.email FROM projects p JOIN users u ON p.user_id = u.id''').fetchall()
+    # Get all projects
+    projects = conn.execute('''
+        SELECT p.*, u.username, u.email 
+        FROM projects p 
+        JOIN users u ON p.user_id = u.id
+    ''').fetchall()
 
-    # Get certificate stats
+    # Certificate stats
     approved_count = conn.execute("SELECT COUNT(*) FROM projects WHERE is_approved = 1").fetchone()[0]
     pending_count = conn.execute("SELECT COUNT(*) FROM projects WHERE is_approved = 0").fetchone()[0]
 
-    # Get currently online users (last activity within 10 minutes)
+    # Get recent user login activity
     recent_threshold = datetime.utcnow() - timedelta(minutes=10)
     logins = conn.execute("SELECT user_id, MAX(timestamp) AS last_seen FROM login_logs GROUP BY user_id").fetchall()
 
@@ -289,7 +326,6 @@ def admin_dashboard():
         if last_seen >= recent_threshold:
             online_user_ids.add(log["user_id"])
 
-    # Convert users into dicts with is_online flag
     all_users = []
     for u in users:
         user_dict = dict(u)
@@ -304,54 +340,185 @@ def admin_dashboard():
                            projects=projects,
                            approved_count=approved_count,
                            pending_count=pending_count,
-                           all_users=all_users)  # 👈 PASS TO TEMPLATE
-    
+                           all_users=all_users)
+
+import requests
+
+def get_ngrok_url():
+    try:
+        response = requests.get("http://127.0.0.1:4040/api/tunnels")
+        tunnels = response.json()["tunnels"]
+        for tunnel in tunnels:
+            if tunnel["proto"] == "https":
+                return tunnel["public_url"]
+    except Exception as e:
+        print("⚠️ Could not fetch ngrok URL:", e)
+        return None
+
+
+import requests
+
+def get_ngrok_url():
+    try:
+        response = requests.get("http://127.0.0.1:4040/api/tunnels")
+        tunnels = response.json()["tunnels"]
+        for tunnel in tunnels:
+            if tunnel["proto"] == "https":
+                return tunnel["public_url"]
+    except Exception as e:
+        print("⚠️ Could not fetch ngrok URL:", e)
+        return None
+
 
 @app.route("/admin/approve-project/<int:project_id>")
 def approve_project(project_id):
-    if not session.get("is_admin"):
+    if not (session.get("is_superadmin") or session.get("role") in ["admin", "lecturer"]):
+        flash("❌ Unauthorized access.", "error")
         return redirect(url_for("login"))
 
     conn = get_db_connection()
-    project = conn.execute('''
-        SELECT p.*, u.first_name, u.email
-        FROM projects p JOIN users u ON p.user_id = u.id
-        WHERE p.id = ?
-    ''', (project_id,)).fetchone()
-
+    project = conn.execute('''SELECT p.*, u.first_name, u.email
+                              FROM projects p JOIN users u ON p.user_id = u.id
+                              WHERE p.id = ?''', (project_id,)).fetchone()
     if not project:
         conn.close()
-        return "❌ Project not found", 404
+        return "Project not found", 404
 
     cert_id = str(uuid.uuid4())[:8]
     cert_filename = f"{cert_id}.pdf"
     cert_path = os.path.join("certs", cert_filename)
 
-    # Generate the certificate
-    rendered = render_template("certificate.html",
-        name=project["first_name"],
-        repo_title=project["project_title"],
-        github_url=project["github_url"],
-        date=datetime.now().strftime("%d %B %Y")
-    )
+    # 🔁 Dynamically get ngrok URL
+    ngrok_url = get_ngrok_url()
+    if ngrok_url:
+        cert_url = f"{ngrok_url}/certs/{cert_filename}"
+    else:
+        cert_url = f"http://localhost:5000/certs/{cert_filename}"  # fallback
+
+    # ✅ Generate certificate
+    rendered = render_template("certificate.html", name=project["first_name"],
+                               repo_title=project["project_title"],
+                               github_url=project["github_url"],
+                               date=datetime.now().strftime("%d %B %Y"))
     HTML(string=rendered, base_url='.').write_pdf(cert_path)
 
-    # ✅ Use full external URL for Render deployment
-    cert_url = url_for('serve_certificate', filename=cert_filename, _external=True)
-
-    try:
+    # ✅ Send email only if not a lecturer (optional logic)
+    if session.get("role") != "lecturer":
         send_certificate_email(project["first_name"], project["email"], cert_url)
-        flash("✅ Certificate emailed successfully.", "success")
-    except Exception as e:
-        flash(f"⚠️ Email sending failed: {e}", "error")
 
-    conn.execute('''
-        UPDATE projects SET is_approved = 1, cert_file = ? WHERE id = ?
-    ''', (cert_filename, project_id))
+    # ✅ Save approval
+    conn.execute("UPDATE projects SET is_approved = 1, cert_file = ? WHERE id = ?", (cert_filename, project_id))
     conn.commit()
     conn.close()
 
-    return redirect(url_for("admin_dashboard"))
+    flash("✅ Project approved and certificate generated.", "success")
+
+    # 🔁 Redirect to correct dashboard
+    if session.get("role") == "lecturer":
+        return redirect(url_for("lecturer_dashboard"))
+    else:
+        return redirect(url_for("admin_dashboard"))
+
+@app.route("/lecturer")
+def lecturer_dashboard():
+    if session.get("role") != "lecturer":
+        flash("❌ Unauthorized access.", "error")
+        return redirect(url_for("login"))
+
+    conn = get_db_connection()
+    projects = conn.execute('''
+        SELECT p.*, u.username, u.email 
+        FROM projects p 
+        JOIN users u ON p.user_id = u.id 
+        WHERE p.is_approved = 0
+    ''').fetchall()
+    conn.close()
+
+    return render_template("lecturer_dashboard.html", projects=projects)
+
+import requests
+
+def get_ngrok_url():
+    try:
+        response = requests.get("http://127.0.0.1:4040/api/tunnels")
+        tunnels = response.json()["tunnels"]
+        for tunnel in tunnels:
+            if tunnel["proto"] == "https":
+                return tunnel["public_url"]
+    except Exception as e:
+        print("⚠️ Could not fetch ngrok URL:", e)
+        return None
+
+
+@app.route("/lecturer/approve-project/<int:project_id>", methods=["POST", "GET"])
+def lecturer_approve_project(project_id):
+    if session.get("role") != "lecturer":
+        flash("❌ Unauthorized access.", "danger")
+        return redirect(url_for("login"))
+
+    conn = get_db_connection()
+    project = conn.execute('''SELECT p.*, u.first_name, u.email
+                              FROM projects p JOIN users u ON p.user_id = u.id
+                              WHERE p.id = ?''', (project_id,)).fetchone()
+
+    if not project:
+        conn.close()
+        flash("❌ Project not found.", "error")
+        return redirect(url_for("lecturer_dashboard"))
+
+    # Generate unique certificate file
+    cert_id = str(uuid.uuid4())[:8]
+    cert_filename = f"{cert_id}.pdf"
+    cert_path = os.path.join("certs", cert_filename)
+
+    # Get dynamic ngrok URL
+    ngrok_url = get_ngrok_url()
+    cert_url = f"{ngrok_url}/certs/{cert_filename}" if ngrok_url else f"http://localhost:5000/certs/{cert_filename}"
+
+    # Render and generate PDF certificate
+    rendered = render_template("certificate.html",
+                               name=project["first_name"],
+                               repo_title=project["project_title"],
+                               github_url=project["github_url"],
+                               date=datetime.now().strftime("%d %B %Y"))
+    HTML(string=rendered, base_url='.').write_pdf(cert_path)
+
+    # Send email
+    send_certificate_email(project["first_name"], project["email"], cert_url)
+
+    # Mark project as approved
+    conn.execute("UPDATE projects SET is_approved = 1, cert_file = ? WHERE id = ?", (cert_filename, project_id))
+    conn.commit()
+    conn.close()
+
+    flash("✅ Project approved and certificate sent.", "success")
+    return redirect(url_for("lecturer_dashboard"))
+
+
+from flask import send_from_directory, abort
+import os
+
+@app.route("/admin/download-profile-pic/<filename>")
+def download_profile_pic(filename):
+    if not session.get("is_superadmin"):
+        flash("❌ Unauthorized access.", "error")
+        return redirect(url_for("login"))
+
+    # Define the folder where profile pics are stored
+    profile_pics_dir = os.path.join(app.root_path, 'static', 'profile_pics')
+
+    # Security check to prevent directory traversal attacks
+    if '..' in filename or filename.startswith('/'):
+        abort(400)
+
+    # Check if file exists
+    file_path = os.path.join(profile_pics_dir, filename)
+    if not os.path.exists(file_path):
+        flash("❌ Profile picture not found.", "error")
+        return redirect(url_for("admin_user_details", user_id=session.get("user_id")))
+
+    # Send the file for download
+    return send_from_directory(profile_pics_dir, filename, as_attachment=True)
 
 
 @app.route("/admin/user/<int:user_id>", methods=["GET", "POST"])
@@ -410,16 +577,23 @@ def make_admin(user_id):
 
 from werkzeug.utils import secure_filename
 
+from werkzeug.utils import secure_filename
+import os
+import sqlite3
+
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
         form = request.form
         file = request.files.get("profile_pic")
         profile_pic_filename = ""
+
+        # Save profile picture if uploaded
         if file and file.filename:
             profile_pic_filename = secure_filename(file.filename)
             file.save(os.path.join("static/profile_pics", profile_pic_filename))
 
+        # Clean and fetch form data
         email = form["email"].strip().lower()
         username = form["username"].strip()
         password = form["password"]
@@ -429,17 +603,21 @@ def register():
         phone = form["phone"]
         age = form["age"]
         class_batch = form["class_batch"]
+        role = "student"  # ✅ Default role
 
+        # Password match check
         if password != confirm:
-            flash("Passwords do not match.", "error")
+            flash("❌ Passwords do not match.", "error")
             return redirect(url_for("register"))
 
+        # Insert into DB
         conn = get_db_connection()
         try:
-            conn.execute("""INSERT INTO users 
-                (first_name, last_name, username, email, phone, age, class_batch, profile_pic, password, is_admin)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
-            """, (first_name, last_name, username, email, phone, age, class_batch, profile_pic_filename, password))
+            conn.execute("""
+                INSERT INTO users 
+                (first_name, last_name, username, email, phone, age, class_batch, profile_pic, password, role)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (first_name, last_name, username, email, phone, age, class_batch, profile_pic_filename, password, role))
             conn.commit()
             flash("✅ Registration successful. Please log in.", "success")
             return redirect(url_for("login"))
@@ -450,6 +628,45 @@ def register():
             conn.close()
 
     return render_template("register.html")
+
+@app.route("/admin/change-role/<int:user_id>", methods=["POST"])
+def change_role(user_id):
+    if not session.get("is_superadmin"):
+        flash("❌ Only Super Admin can change user roles.", "danger")
+        return redirect(url_for("login"))
+
+    new_role = request.form.get("role")
+    if new_role not in ["student", "lecturer", "admin"]:
+        flash("❌ Invalid role specified.", "error")
+        return redirect(url_for("admin_dashboard"))
+
+    conn = get_db_connection()
+    user = conn.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
+
+    if not user:
+        flash("❌ User not found.", "error")
+        conn.close()
+        return redirect(url_for("admin_dashboard"))
+
+    # ❗ Fix here: No .get() on sqlite3.Row
+    if user["is_superadmin"] == 1:
+        flash("❌ Cannot change the role of the Super Admin.", "error")
+        conn.close()
+        return redirect(url_for("admin_dashboard"))
+
+    if user["id"] == session.get("user_id"):
+        flash("❌ You cannot change your own role.", "error")
+        conn.close()
+        return redirect(url_for("admin_dashboard"))
+
+    conn.execute("UPDATE users SET role = ? WHERE id = ?", (new_role, user_id))
+    conn.commit()
+    conn.close()
+
+    flash(f"✅ Role updated to {new_role.title()}.", "success")
+    return redirect(url_for("admin_dashboard"))
+
+
 
 @app.route("/admin/revoke-admin/<int:user_id>")
 def revoke_admin(user_id):
@@ -463,74 +680,58 @@ def revoke_admin(user_id):
 def init_admin():
     conn = get_db_connection()
 
-    # ✅ Ensure users table
-    conn.execute('''
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            first_name TEXT, last_name TEXT, username TEXT,
-            email TEXT UNIQUE, phone TEXT, age INTEGER,
-            class_batch TEXT, profile_pic TEXT,
-            password TEXT, is_admin INTEGER DEFAULT 0
-        )
-    ''')
+    # Create tables
+    conn.execute('''CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        first_name TEXT, last_name TEXT, username TEXT,
+        email TEXT UNIQUE, phone TEXT, age INTEGER,
+        class_batch TEXT, profile_pic TEXT,
+        password TEXT, is_admin INTEGER DEFAULT 0
+    )''')
 
-    # ✅ Ensure projects table
-    conn.execute('''
-        CREATE TABLE IF NOT EXISTS projects (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER,
-            github_url TEXT,
-            project_title TEXT,
-            cert_file TEXT,
-            submitted_on TEXT,
-            is_approved INTEGER DEFAULT 0,
-            FOREIGN KEY(user_id) REFERENCES users(id)
-        )
-    ''')
+    conn.execute('''CREATE TABLE IF NOT EXISTS projects (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        github_url TEXT,
+        project_title TEXT,
+        cert_file TEXT,
+        submitted_on TEXT,
+        is_approved INTEGER DEFAULT 0,
+        FOREIGN KEY(user_id) REFERENCES users(id)
+    )''')
 
-    # ✅ Ensure login_logs table
-    conn.execute('''
-        CREATE TABLE IF NOT EXISTS login_logs (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER,
-            email TEXT,
-            ip TEXT,
-            user_agent TEXT,
-            location TEXT,
-            login_time TEXT,
-            logout_time TEXT
-        )
-    ''')
+    conn.execute('''CREATE TABLE IF NOT EXISTS login_logs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        email TEXT,
+        ip TEXT,
+        user_agent TEXT,
+        location TEXT,
+        login_time TEXT,
+        logout_time TEXT
+    )''')
 
-    # ✅ Patch: Add missing column if not exists
+    # Alter table only if needed
     try:
         conn.execute("ALTER TABLE login_logs ADD COLUMN timestamp TEXT")
     except sqlite3.OperationalError:
-        pass  # Column already exists
+        pass  # Already exists
 
-    # ✅ Create default admin
+    # Create default admin if not exists
     admin = conn.execute("SELECT * FROM users WHERE email = 'admin@smscollege.edu'").fetchone()
     if not admin:
-        conn.execute('''
-            INSERT INTO users (
-                first_name, last_name, username, email, phone,
-                age, class_batch, profile_pic, password, is_admin
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
-        ''', (
+        conn.execute('''INSERT INTO users (
+            first_name, last_name, username, email, phone,
+            age, class_batch, profile_pic, password, is_admin
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)''', (
             "Admin", "Account", "admin", "admin@smscollege.edu",
             "0000000000", 0, "Admin", "", "smsbcabvr"
         ))
-        print("[INFO] ✅ Default admin created.")
+        print("[INFO] Default admin created.")
+        conn.commit()
 
-    # ✅ Ensure certs folder exists
-    if not os.path.exists("certs"):
-        os.makedirs("certs")
-        print("[INFO] Created missing 'certs/' folder.")
-
-    conn.commit()
     conn.close()
-    print("[INFO] ✅ Database initialized successfully.")
-
+    print("[INFO] Database initialized successfully.")
 
     
 @app.route("/profile")
@@ -559,38 +760,56 @@ def user_profile_pic(filename):
 
 @app.route("/admin/delete-user/<int:user_id>", methods=["POST"])
 def delete_user(user_id):
-    if not session.get("is_admin"):
-        flash("❌ Unauthorized", "error")
+    # Only allow superadmins or admins to delete users
+    if not session.get("is_superadmin") and session.get("role") != "admin":
+        flash("❌ Unauthorized access.", "error")
         return redirect(url_for("login"))
 
     conn = get_db_connection()
     user = conn.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
 
-    if user and user["is_admin"]:
-        flash("❌ Cannot delete another admin.", "error")
+    # Prevent deletion if user is superadmin
+    if user and user["is_superadmin"] == 1:
+        flash("❌ Cannot delete the Super Admin.", "error")
         conn.close()
         return redirect(url_for("admin_dashboard"))
 
+    # Prevent deletion of other admins if current user is not superadmin
+    if user and user["role"] == "admin" and not session.get("is_superadmin"):
+        flash("❌ Cannot delete another admin unless you are Super Admin.", "error")
+        conn.close()
+        return redirect(url_for("admin_dashboard"))
+
+    # Delete user and related projects
     conn.execute("DELETE FROM users WHERE id = ?", (user_id,))
     conn.execute("DELETE FROM projects WHERE user_id = ?", (user_id,))
-    print(f"Delete requested for user ID: {user_id}")
-
     conn.commit()
     conn.close()
 
-    flash("✅ User and their projects deleted.", "success")
+    flash("✅ User and their projects deleted successfully.", "success")
     return redirect(url_for("admin_dashboard"))
-    
+
 
 @app.route("/admin/delete-all-non-admins", methods=["POST"])
 def delete_all_non_admins():
-    if not session.get("is_admin"):
-        flash("❌ Unauthorized", "error")
+    if not session.get("is_superadmin") and session.get("role") != "admin":
+        flash("❌ Unauthorized access.", "error")
         return redirect(url_for("login"))
 
     conn = get_db_connection()
-    conn.execute("DELETE FROM users WHERE is_admin = 0")
-    conn.execute("DELETE FROM projects WHERE user_id NOT IN (SELECT id FROM users WHERE is_admin = 1)")
+
+    # Delete only users who are NOT admins or superadmins
+    conn.execute("""
+        DELETE FROM users 
+        WHERE role != 'admin' AND IFNULL(is_superadmin, 0) = 0
+    """)
+
+    # Clean up orphaned projects
+    conn.execute("""
+        DELETE FROM projects 
+        WHERE user_id NOT IN (SELECT id FROM users)
+    """)
+
     conn.commit()
     conn.close()
 
@@ -659,10 +878,45 @@ def export_login_logs():
     df.to_excel(filepath, index=False)
     return send_file(filepath, as_attachment=True)
 
+@app.route("/admin/user/<int:user_id>", methods=["GET", "POST"])
+def edit_user(user_id):
+    if not session.get("is_superadmin") and session.get("role") != "admin":
+        flash("Unauthorized access", "danger")
+        return redirect(url_for("login"))
+
+    conn = get_db_connection()
+    user = conn.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
+
+    if not user:
+        conn.close()
+        flash("User not found", "error")
+        return redirect(url_for("admin_dashboard"))
+
+    if request.method == "POST":
+        first_name = request.form["first_name"]
+        last_name = request.form["last_name"]
+        email = request.form["email"]
+        phone = request.form["phone"]
+        class_batch = request.form["class_batch"]
+        role = request.form["role"]  # 👈 capture new role
+
+        conn.execute('''
+            UPDATE users
+            SET first_name = ?, last_name = ?, email = ?, phone = ?, class_batch = ?, role = ?
+            WHERE id = ?
+        ''', (first_name, last_name, email, phone, class_batch, role, user_id))
+
+        conn.commit()
+        conn.close()
+
+        flash("✅ User details updated.", "success")
+        return redirect(url_for("admin_dashboard"))
+
+    conn.close()
+    return render_template("edit_user.html", user=user)
 
 
 
 if __name__ == "__main__":
     init_admin()
     app.run(debug=True)
-

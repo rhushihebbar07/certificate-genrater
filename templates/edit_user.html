@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Edit User{% endblock %}
+{% block content %}
+<div class="container mt-5">
+  <h2>Edit User - {{ user.first_name }} {{ user.last_name }}</h2>
+  <form method="POST">
+    <div class="mb-3">
+      <label>First Name</label>
+      <input type="text" name="first_name" class="form-control" value="{{ user.first_name }}" required>
+    </div>
+    <div class="mb-3">
+      <label>Last Name</label>
+      <input type="text" name="last_name" class="form-control" value="{{ user.last_name }}">
+    </div>
+    <div class="mb-3">
+      <label>Email</label>
+      <input type="email" name="email" class="form-control" value="{{ user.email }}" required>
+    </div>
+    <div class="mb-3">
+      <label>Phone</label>
+      <input type="text" name="phone" class="form-control" value="{{ user.phone }}">
+    </div>
+    <div class="mb-3">
+      <label>Batch</label>
+      <input type="text" name="class_batch" class="form-control" value="{{ user.class_batch }}">
+    </div>
+    <div class="mb-3">
+      <label>Role</label>
+      <select name="role" class="form-select" required>
+        <option value="student" {% if user.role == 'student' %}selected{% endif %}>Student</option>
+        <option value="lecturer" {% if user.role == 'lecturer' %}selected{% endif %}>Lecturer</option>
+        <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
+      </select>
+    </div>
+    <button type="submit" class="btn btn-success">Save Changes</button>
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Cancel</a>
+  </form>
+</div>
+{% endblock %}
