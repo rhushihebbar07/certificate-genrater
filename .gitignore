@@ -1,2 +1,37 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# SQLite database files
+*.sqlite3
+*.db
+
+# Flask secret keys / environment variables
 .env
-static\profile_pics
+*.env
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Logs and debug info
+*.log
+
+# VS Code settings
+.vscode/
+
+# Python virtual environments
+venv/
+env/
+
+# WeasyPrint temporary PDF files
+*.pdf
+*.tmp
+
+# Uploaded profile pictures
+static/profile_pics/
+
+# Compiled static files
+static/__pycache__/
+templates/__pycache__/
