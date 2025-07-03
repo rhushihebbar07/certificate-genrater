@@ -20,11 +20,11 @@
 
 ## 🚀 Project Overview
 
-- 🔗 Upload GitHub project link
-- 👥 Four powerful user roles with custom dashboards
-- 📨 Auto-generate & send certificates using SMTP
-- 🔐 Secure login, clean interface, and role access control
-- ⚡ Smart development workflow built with guidance from **ChatGPT**
+- 🔗 Upload GitHub project link  
+- 👥 Four powerful user roles with custom dashboards  
+- 📨 Auto-generate & send certificates using SMTP  
+- 🔐 Secure login, clean interface, and role access control  
+- ⚡ Built efficiently with help from **ChatGPT**  
 
 ---
 
