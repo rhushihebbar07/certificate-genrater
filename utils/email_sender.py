@@ -12,7 +12,7 @@ def send_certificate_email(name, recipient_email, cert_url):
     sender_password = "pnai waam mzpp stjd"
 
     # 🔐 Safe sender with display name
-    sender_name = "SMS College Certificates 🎓"
+    sender_name = "XYZ College Certificates 🎓"
     formatted_sender = formataddr((str(Header(sender_name, 'utf-8')), sender_email))
 
     # Create the multipart message
@@ -30,7 +30,7 @@ Congratulations! Your GitHub project has been approved.
 Your certificate is ready. View or download it here:
 {cert_url}
 
-— SMS College Certificate System
+— XYZ College Certificate System
     """
 
     # 🖼️ HTML version
@@ -39,7 +39,7 @@ Your certificate is ready. View or download it here:
       <body style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px;">
         <div style="max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px;">
           <h2>Hi {name},</h2>
-          <p>🎉 Congratulations! Your GitHub project has been approved by <strong>SMS College</strong>.</p>
+          <p>🎉 Congratulations! Your GitHub project has been approved by <strong>XYZ College</strong>.</p>
           <p>Your certificate is ready. Click the button below to view or download it:</p>
           <p style="text-align: center;">
             <a href="{cert_url}" style="display: inline-block; background-color: #4CAF50; color: white;

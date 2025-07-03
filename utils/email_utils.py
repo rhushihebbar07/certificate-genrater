@@ -6,7 +6,7 @@ def send_certificate_email(name, recipient_email, cert_url):
     sender_email = "donotreplay93@gmail.com"
     sender_password = "pnai waam mzpp stjd"
 
-    subject = "🎓 Your Project Completion Certificate - SMS College"
+    subject = "🎓 Your Project Completion Certificate - XYZ College"
     html_content = f"""
     <html>
       <body style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 30px;">

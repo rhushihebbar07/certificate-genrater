@@ -1,43 +1,27 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
+# 🔒 Secrets
+.env
 
-# SQLite database files
+# 🖼️ User uploads
+static/profile_pics/
+*.jpg
+*.png
+*.jpeg
+
+# 🧠 Python
+__pycache__/
+*.pyc
+
+# 🗃️ DBs
 *.sqlite3
 *.db
 
-# Flask secret keys / environment variables
-.env
-*.env
-
-# System files
-.DS_Store
-Thumbs.db
-
-# Logs and debug info
-*.log
-
-# VS Code settings
-.vscode/
-
-# Python virtual environments
+# 🧪 Virtual environments
 venv/
 env/
 
-# WeasyPrint temporary PDF files
+# 📄 Generated files
 *.pdf
 *.tmp
 
-# Uploaded profile pictures
-static/profile_pics/
-
-# Compiled static files
-static/__pycache__/
-templates/__pycache__/
-
-# Hide profile images
-static/profile_pics/
-*.jpg
-*.jpeg
-*.png
+# 💻 IDE settings
+.vscode/

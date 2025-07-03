@@ -98,7 +98,7 @@ def send_certificate_email(name, email, cert_url):
     signature_url = "https://yourdomain.com/static/principal_sign.png"  # 🔁 optional signature
 
     msg = Message(
-        subject="🎓 Your Certificate is Ready - SMS College",
+        subject="🎓 Your Certificate is Ready - XYZ College",
         sender=app.config['MAIL_USERNAME'],
         recipients=[email]
     )
@@ -106,7 +106,7 @@ def send_certificate_email(name, email, cert_url):
     msg.html = f"""
     <div style="font-family: 'Segoe UI', sans-serif; color: #1e293b; max-width: 600px; margin: auto; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden;">
         <div style="padding: 20px; text-align: center; background-color: #f8fafc;">
-            <img src="{logo_url}" alt="SMS College Logo" style="max-height: 80px; margin-bottom: 10px;">
+            <img src="{logo_url}" alt="XYZ College Logo" style="max-height: 80px; margin-bottom: 10px;">
             <h2 style="color: #2563eb; margin: 0;">Saint Mary's Syrian College</h2>
             <p style="margin: 0; font-weight: 500;">Department of Computer Applications</p>
         </div>
@@ -126,7 +126,7 @@ def send_certificate_email(name, email, cert_url):
 
             <div style="margin-top: 30px;">
                 <img src="{signature_url}" alt="Principal Signature" style="height: 60px;"><br>
-                <p style="font-size: 14px; margin-top: 5px;">Principal<br>SMS College</p>
+                <p style="font-size: 14px; margin-top: 5px;">Principal<br>XYZ College</p>
             </div>
         </div>
 
@@ -176,7 +176,7 @@ def forgot_password():
         if user:
             token = serializer.dumps(email, salt='reset-password')
             reset_url = url_for('reset_password', token=token, _external=True)
-            msg = Message("🔐 Reset Your Password - SMS College", sender=app.config['MAIL_USERNAME'], recipients=[email])
+            msg = Message("🔐 Reset Your Password - XYZ College", sender=app.config['MAIL_USERNAME'], recipients=[email])
             msg.html = f"""<div style='font-family: Arial, sans-serif;'>
                 <h2>🔐 Password Reset Request</h2>
                 <p>Hi {user['first_name']}, click below to reset your password:</p>
